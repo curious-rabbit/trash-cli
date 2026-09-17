@@ -63,7 +63,11 @@ class RealRemoveFile2(RemoveFile2):
         try:
             os.remove(path)
         except OSError:
-            shutil.rmtree(path)
+            try:
+                shutil.rmtree(path)
+            except OSError:
+                _add_write_permission(path)
+                shutil.rmtree(path)
 
 
 class RealRemoveFileIfExists(RemoveFileIfExists, RemoveFile2):
@@ -119,3 +123,12 @@ class RealFileSize(FileSize):
 def _read_file(path):
     with open(path) as f:
         return f.read()
+
+
+def _add_write_permission(path):
+    # add write and search bits to each directory so its entries can be deleted
+    for root, dirs, files in os.walk(path):
+        try:
+            os.chmod(root, os.stat(root).st_mode | stat.S_IWUSR | stat.S_IXUSR)
+        except OSError:
+            pass
