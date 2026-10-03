@@ -66,6 +66,14 @@ class Fs(RealPathFs, VolumeOfFs, MkDirs, Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    def add_write_permission(self, path):  # type: (str) -> dict
+        raise NotImplementedError
+
+    @abstractmethod
+    def restore_modes(self, path, old_modes):  # type: (str, dict) -> None
+        raise NotImplementedError
+
+    @abstractmethod
     def is_symlink(self, path):
         raise NotImplementedError
 

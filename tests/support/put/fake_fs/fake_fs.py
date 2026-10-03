@@ -309,6 +309,28 @@ class FakeFs(FakeVolumeOfFs, Fs, DirReaderFs, IsStickyDir, IsSymLink, RestoreFs,
                 raise OSError(errno.EACCES, "Permission denied", child_path)
             directory.remove(name)
 
+    def add_write_permission(self, path):
+        # like RealFs: only readable dirs change, symlinks are not followed
+        old_modes = {}
+        if self.path_lexists(path):
+            self._add_write_permission(self._get_entry_at(path), old_modes)
+        return old_modes
+
+    def _add_write_permission(self, inode, old_modes):
+        if not isinstance(inode.entity, Directory) or inode.mode & 0o400 == 0:
+            return
+        if inode.mode & 0o300 != 0o300:
+            old_modes[inode] = inode.mode
+            inode.chmod(inode.mode | 0o300)
+        directory = inode.directory()
+        for name in directory.entries():
+            if name not in ('.', '..'):
+                self._add_write_permission(directory.inode_of(name), old_modes)
+
+    def restore_modes(self, path, old_modes):
+        for inode, mode in old_modes.items():
+            inode.chmod(mode)
+
     def _remove_entry(self, path):
         dirname, basename = os.path.split(path)
         directory = self.get_entity_at(dirname)
