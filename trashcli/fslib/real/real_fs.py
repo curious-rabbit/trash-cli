@@ -10,7 +10,6 @@ from trashcli.fslib.real.real_remove_file import RealRemoveFile
 from trashcli.fslib.real.real_atomic_write import RealAtomicWrite
 from trashcli.fslib.real.real_read_file import RealReadFile
 from trashcli.fslib.real.real_write_file import RealWriteFile
-from trashcli.fslib.real import real_write_permission
 from trashcli.fslib.real.real_mk_dirs import RealMkDirs
 from trashcli.fstab.real.real_mount_point_list_fs import RealMountPointListFs
 from trashcli.fslib.real.real_volume_of import RealVolumeOfFs
@@ -81,12 +80,6 @@ class RealFs(RealVolumeOfFs, Fs, RestoreFs, TopTrashDirRulesFs):
 
     def shutil_rmtree(self, path):  # type: (str) -> None
         shutil.rmtree(path)
-
-    def add_write_permission(self, path):  # type: (str) -> dict
-        return real_write_permission.add_write_permission(path)
-
-    def restore_modes(self, path, old_modes):  # type: (str, dict) -> None
-        real_write_permission.restore_modes(path, old_modes)
 
     def is_symlink(self, path):
         return os.path.islink(path)
