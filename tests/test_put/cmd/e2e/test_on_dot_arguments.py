@@ -31,6 +31,21 @@ class TestWhenFedWithDotArguments:
         assert result.combined() == [
             "trash-put: cannot trash directory '..'\n", EX_IOERR]
 
+    def test_dot_with_a_trailing_slash_is_skipped(self, temp_dir, fs):
+        fs.make_empty_file(temp_dir / 'file')
+
+        result = run_trash_put(temp_dir, ["./"])
+
+        assert result.combined() + temp_dir.existence_of(temp_dir / 'file') == [
+            "trash-put: cannot trash directory '.'\n", EX_IOERR,
+            "/file: exists"]
+
+    def test_dot_dot_with_a_trailing_slash_is_skipped(self, temp_dir):
+        result = run_trash_put(temp_dir, ["../"])
+
+        assert result.combined() == [
+            "trash-put: cannot trash directory '..'\n", EX_IOERR]
+
     def test_dot_argument_is_skipped_even_in_subdirs(self, temp_dir, fs):
         sandbox = temp_dir / 'sandbox'
         fs.mkdir_p(sandbox)
